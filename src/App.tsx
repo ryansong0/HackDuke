@@ -61,6 +61,12 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<"search" | "dashboard">("search");
   const [globalImpact, setGlobalImpact] = useState(1240562);
+  const [amazonContext, setAmazonContext] = useState<{
+    title: string | null;
+    price: string | null;
+    img: string | null;
+    cat: string | null;
+  }>({ title: null, price: null, img: null, cat: null });
   
   // Chat state
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -104,6 +110,20 @@ export default function App() {
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const searchQuery = params.get("search");
+    const price = params.get("price");
+    const img = params.get("img");
+    const cat = params.get("cat");
+
+    if (searchQuery) {
+      setAmazonContext({ title: searchQuery, price, img, cat });
+      setInput(searchQuery);
+      analyzeItem(searchQuery);
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("ecoSwapStats", JSON.stringify(stats));
@@ -482,27 +502,66 @@ export default function App() {
       <main className="max-w-6xl mx-auto px-6 pb-24">
         {view === "search" ? (
           <>
+            {/* Amazon Context Header */}
+            {amazonContext.title && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8 p-6 bg-white rounded-[2rem] border border-emerald-100 shadow-sm flex flex-col sm:flex-row items-center gap-6"
+              >
+                <div className="flex items-center gap-3 text-emerald-600 font-bold text-xs uppercase tracking-widest sm:hidden w-full">
+                  <Leaf size={14} /> Shopping Assistant
+                </div>
+                {amazonContext.img && (
+                  <img src={amazonContext.img} alt="" className="w-20 h-20 object-contain bg-[#fdfcf9] rounded-2xl p-2 border border-black/5" />
+                )}
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="hidden sm:flex items-center gap-2 text-emerald-600 font-bold text-[10px] uppercase tracking-widest mb-1">
+                    <Leaf size={12} /> Shopping Assistant
+                  </div>
+                  <h3 className="text-lg font-medium leading-tight mb-1">{amazonContext.title}</h3>
+                  <div className="flex items-center justify-center sm:justify-start gap-3 text-sm opacity-60">
+                    <span>{amazonContext.price}</span>
+                    {amazonContext.cat && (
+                      <>
+                        <span className="w-1 h-1 bg-black/20 rounded-full" />
+                        <span>{amazonContext.cat}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col items-center sm:items-end gap-1">
+                  <div className="text-[10px] font-bold uppercase tracking-widest opacity-30">Status</div>
+                  <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm">
+                    <CheckCircle2 size={16} /> Analyzing for Swaps
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Hero & Global Ticker */}
-            <section className="mb-12 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-              <div className="max-w-2xl">
-                <h2 className="text-4xl sm:text-6xl font-serif italic mb-4 leading-tight">
-                  Swap plastic for <span className="text-emerald-700">better</span> alternatives.
-                </h2>
-                <p className="text-lg opacity-70">
-                  Find and buy real-world sustainable products that fit your budget and values.
-                </p>
-              </div>
-              
-              <div className="bg-emerald-900 text-white p-6 rounded-3xl shadow-lg min-w-[280px]">
-                <div className="flex items-center gap-2 opacity-60 text-xs font-bold uppercase tracking-widest mb-2">
-                  <Users size={14} /> Global Community Impact
+            {!amazonContext.title && (
+              <section className="mb-12 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+                <div className="max-w-2xl">
+                  <h2 className="text-4xl sm:text-6xl font-serif italic mb-4 leading-tight">
+                    Swap plastic for <span className="text-emerald-700">better</span> alternatives.
+                  </h2>
+                  <p className="text-lg opacity-70">
+                    Find and buy real-world sustainable products that fit your budget and values.
+                  </p>
                 </div>
-                <div className="text-4xl font-mono font-bold text-emerald-400">
-                  {globalImpact.toLocaleString()}
+                
+                <div className="bg-emerald-900 text-white p-6 rounded-3xl shadow-lg min-w-[280px]">
+                  <div className="flex items-center gap-2 opacity-60 text-xs font-bold uppercase tracking-widest mb-2">
+                    <Users size={14} /> Global Community Impact
+                  </div>
+                  <div className="text-4xl font-mono font-bold text-emerald-400">
+                    {globalImpact.toLocaleString()}
+                  </div>
+                  <p className="text-xs opacity-60 mt-1">Plastic items diverted today</p>
                 </div>
-                <p className="text-xs opacity-60 mt-1">Plastic items diverted today</p>
-              </div>
-            </section>
+              </section>
+            )}
 
             {/* Filters & Search */}
             <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-black/5 mb-12">
