@@ -1,20 +1,47 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# EcoSwap - Chrome Extension
 
-# Run and deploy your AI Studio app
+Find eco-friendly alternatives while shopping online. EcoSwap automatically detects products on Amazon, Walmart, Target, eBay, Best Buy, and Etsy, then suggests sustainable alternatives powered by Google Gemini AI.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/c464b7eb-0f9d-47fa-9138-4b70f291c193
+- **Auto-detect products** on major shopping sites
+- **Inline eco-badge** appears next to the product title with a sustainability score
+- **Slide-in sidebar** with detailed eco-friendly alternatives, pricing, and buy links
+- **Impact dashboard** tracks your swaps, plastic diverted, and money saved
+- **Configurable filters** for sustainability rating and price range
 
-## Run Locally
+## Supported Sites
 
-**Prerequisites:**  Node.js
+Amazon, Walmart, Target, eBay, Best Buy, Etsy (+ generic fallback via Open Graph metadata)
 
+## Setup
+
+**Prerequisites:** Node.js 18+, Google Chrome
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   ```
+   npm install
+   ```
+
+2. Build the extension:
+   ```
+   npm run build
+   ```
+
+3. Load in Chrome:
+   - Open `chrome://extensions/`
+   - Enable **Developer mode** (top right)
+   - Click **Load unpacked**
+   - Select the `dist/` folder
+
+4. Click the EcoSwap icon in the toolbar and enter your [Gemini API key](https://aistudio.google.com/apikey) in Settings.
+
+5. Visit any product page on a supported site -- the EcoSwap badge will appear automatically.
+
+## Development
+
+```
+npm run lint    # TypeScript type check
+npm run build   # Build to dist/
+npm run clean   # Remove dist/
+```

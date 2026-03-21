@@ -1,5 +1,0 @@
-{
-  "name": "EcoSwap",
-  "description": "Find eco-friendly alternatives to common plastic items and understand their environmental impact.",
-  "requestFramePermissions": ["camera"]
-}

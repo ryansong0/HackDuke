@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "EcoSwap",
+  "version": "1.0.0",
+  "description": "Find eco-friendly alternatives while shopping online. Works on Amazon, Walmart, Target, eBay, and more.",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.amazon.com/*",
+        "https://www.amazon.co.uk/*",
+        "https://www.amazon.ca/*",
+        "https://www.amazon.de/*",
+        "https://www.amazon.fr/*",
+        "https://www.amazon.co.jp/*",
+        "https://www.amazon.in/*",
+        "https://www.walmart.com/*",
+        "https://www.target.com/*",
+        "https://www.ebay.com/*",
+        "https://www.bestbuy.com/*",
+        "https://www.etsy.com/*"
+      ],
+      "js": ["content/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
