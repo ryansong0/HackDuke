@@ -1,7 +1,5 @@
 {
   "name": "EcoSwap",
-  "description": "Find eco-friendly alternatives to common plastic products and understand their environmental impact.",
-  "requestFramePermissions": [
-    "camera"
-  ]
+  "description": "Find eco-friendly alternatives to common plastic items and understand their environmental impact.",
+  "requestFramePermissions": ["camera"]
 }
