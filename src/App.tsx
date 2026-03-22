@@ -19,6 +19,8 @@ interface Alternative {
   sustainabilityRating: number; // 1-100
   priceRating: number; // 1-5 (1 = cheapest, 5 = most expensive)
   estimatedAnnualSavings: number;
+  carbonSavedKg: number;
+  plasticSavedKg: number;
   impact: {
     carbonFootprint: string;
     biodegradability: string;
@@ -35,6 +37,7 @@ interface SearchResult {
 interface UserStats {
   swapsCount: number;
   plasticDivertedKg: number;
+  carbonSavedKg: number;
   moneySaved: number;
   history: {
     item: string;
@@ -42,6 +45,8 @@ interface UserStats {
     brand: string;
     date: string;
     savings: number;
+    carbonSavedKg: number;
+    plasticSavedKg: number;
     url: string;
   }[];
 }
@@ -63,6 +68,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : {
       swapsCount: 0,
       plasticDivertedKg: 0,
+      carbonSavedKg: 0,
       moneySaved: 0,
       history: []
     };
@@ -101,7 +107,9 @@ export default function App() {
             "buyUrl": "string (MUST be a direct, valid URL to a product page on Amazon, Target, or official brand site. Ensure the link is active and not a 404)",
             "sustainabilityRating": number (1-100),
             "priceRating": number (1-5, where 1 is budget and 5 is premium),
-            "estimatedAnnualSavings": number,
+            "estimatedAnnualSavings": number (dollars saved per year vs disposable alternative),
+            "carbonSavedKg": number (kg of CO2 saved per year by switching to this product),
+            "plasticSavedKg": number (kg of plastic waste avoided per year by switching to this product),
             "impact": { "carbonFootprint": "string", "biodegradability": "string", "oceanImpact": "string" },
             "properties": ["string"]
           }
@@ -166,12 +174,15 @@ export default function App() {
       brand: alt.brand,
       date: new Date().toLocaleDateString(),
       savings: alt.estimatedAnnualSavings,
+      carbonSavedKg: alt.carbonSavedKg || 0,
+      plasticSavedKg: alt.plasticSavedKg || 0,
       url: alt.buyUrl
     };
 
     setStats(prev => ({
       swapsCount: prev.swapsCount + 1,
-      plasticDivertedKg: prev.plasticDivertedKg + 0.5,
+      plasticDivertedKg: prev.plasticDivertedKg + (alt.plasticSavedKg || 0),
+      carbonSavedKg: (prev.carbonSavedKg || 0) + (alt.carbonSavedKg || 0),
       moneySaved: prev.moneySaved + alt.estimatedAnnualSavings,
       history: [newSwap, ...prev.history].slice(0, 10)
     }));
@@ -419,7 +430,7 @@ export default function App() {
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-12">
             <section>
               <h2 className="text-4xl font-serif italic mb-8">Your Sustainability Dashboard</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-black/5">
                   <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-4">
                     <Recycle size={24} />
@@ -433,6 +444,13 @@ export default function App() {
                   </div>
                   <div className="text-4xl font-serif italic mb-1">{stats.plasticDivertedKg.toFixed(1)}kg</div>
                   <p className="text-sm opacity-50 uppercase tracking-widest font-bold">Plastic Diverted</p>
+                </div>
+                <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-black/5">
+                  <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center text-green-700 mb-4">
+                    <Leaf size={24} />
+                  </div>
+                  <div className="text-4xl font-serif italic mb-1">{(stats.carbonSavedKg || 0).toFixed(1)}kg</div>
+                  <p className="text-sm opacity-50 uppercase tracking-widest font-bold">CO₂ Saved</p>
                 </div>
                 <div className="bg-emerald-600 p-8 rounded-[2rem] shadow-xl text-white">
                   <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white mb-4">
