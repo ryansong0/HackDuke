@@ -6,7 +6,7 @@ Find eco-friendly alternatives while shopping online. EcoSwap automatically dete
 
 - **Auto-detect products** on major shopping sites
 - **Inline eco-badge** appears next to the product title with a sustainability score
-- **Slide-in sidebar** with detailed eco-friendly alternatives, pricing, and buy links
+- **Slide-in sidebar** with detailed eco-friendly alternatives, pricing, and real shopping links
 - **Impact dashboard** tracks your swaps, plastic diverted, and money saved
 - **Configurable filters** for sustainability rating and price range
 
@@ -37,6 +37,10 @@ Amazon, Walmart, Target, eBay, Best Buy, Etsy (+ generic fallback via Open Graph
 4. Click the EcoSwap icon in the toolbar and enter your [Gemini API key](https://aistudio.google.com/apikey) in Settings.
 
 5. Visit any product page on a supported site -- the EcoSwap badge will appear automatically.
+
+## Amazon Link Behavior
+
+On Amazon product pages, EcoSwap converts each recommendation into a real Amazon search-results link for that suggested product. This avoids broken or hallucinated model links and sends users to live Amazon listings they can click through.
 
 ## Development
 

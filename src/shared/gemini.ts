@@ -40,6 +40,44 @@ const RESPONSE_SCHEMA = {
   required: ['originalItem', 'alternatives'],
 };
 
+function isAmazonSite(site: string): boolean {
+  return site.toLowerCase().includes('amazon.');
+}
+
+function getAmazonBaseUrl(product: ProductInfo): string {
+  try {
+    const url = new URL(product.url);
+    return `${url.protocol}//${url.hostname}`;
+  } catch {
+    const hostname = product.site.startsWith('www.') ? product.site : `www.${product.site}`;
+    return `https://${hostname}`;
+  }
+}
+
+function buildAmazonSearchUrl(product: ProductInfo, name: string, brand: string): string {
+  const query = [brand, name]
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .join(' ');
+
+  return `${getAmazonBaseUrl(product)}/s?k=${encodeURIComponent(query)}`;
+}
+
+function normalizeResultLinks(result: SearchResult, product: ProductInfo): SearchResult {
+  if (!isAmazonSite(product.site)) {
+    return result;
+  }
+
+  return {
+    ...result,
+    alternatives: result.alternatives.map((alt) => ({
+      ...alt,
+      // Use a real Amazon search results URL rather than trusting model-generated product links.
+      buyUrl: buildAmazonSearchUrl(product, alt.name, alt.brand),
+    })),
+  };
+}
+
 export async function analyzeProduct(
   product: ProductInfo,
   apiKey: string,
@@ -50,7 +88,7 @@ export async function analyzeProduct(
   if (demoMode) {
     console.log('[EcoSwap] Demo mode — returning mock data for:', product.name);
     await new Promise((r) => setTimeout(r, 600));
-    return getMockResult(product.name);
+    return normalizeResultLinks(getMockResult(product.name), product);
   }
 
   const key = apiKey.trim();
@@ -62,7 +100,7 @@ export async function analyzeProduct(
 
   const prompt = `Suggest 4 eco-friendly alternatives to "${product.name}" (${product.price}) on ${product.site}.
 Each must have sustainabilityRating >= ${minSustainability}/100 and priceRating <= ${maxPrice}/5.
-buyUrl must be a real product page URL (Amazon, Target, Walmart, or brand site). No homepage links.
+buyUrl can be any placeholder product URL. The extension will replace it with a real shopping search link.
 estimatedAnnualSavings = annual disposable cost minus eco alternative cost.`;
 
   let lastError: Error | null = null;
@@ -117,7 +155,7 @@ estimatedAnnualSavings = annual disposable cost minus eco alternative cost.`;
         throw new Error('Invalid response format');
       }
 
-      return data;
+      return normalizeResultLinks(data, product);
     } catch (err: any) {
       clearTimeout(timer);
 

@@ -327,6 +327,10 @@ function getPriceRange(rating: number): string {
   }
 }
 
+function getBuyButtonLabel(url: string): string {
+  return url.includes('/s?k=') ? 'View Amazon Matches' : 'Buy Now';
+}
+
 export class EcoSwapSidebar {
   private host: HTMLElement;
   private shadow: ShadowRoot;
@@ -466,7 +470,7 @@ export class EcoSwapSidebar {
 
       const buyBtn = document.createElement('a');
       buyBtn.className = 'buy-btn';
-      buyBtn.textContent = 'Buy Now';
+      buyBtn.textContent = getBuyButtonLabel(alt.buyUrl);
       buyBtn.href = alt.buyUrl;
       buyBtn.target = '_blank';
       buyBtn.rel = 'noopener noreferrer';
