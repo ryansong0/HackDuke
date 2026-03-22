@@ -88,6 +88,7 @@ export default function App() {
   }, []);
 
   const [scanMode, setScanMode] = useState<"general" | "barcode">("general");
+  const [chartMetric, setChartMetric] = useState<"carbon" | "plastic" | "money">("carbon");
 
   const analyzeItem = async (text?: string, base64Image?: string, mode: "general" | "barcode" = "general") => {
     setLoading(true);
@@ -460,6 +461,68 @@ export default function App() {
                   <p className="text-sm opacity-70 uppercase tracking-widest font-bold">Estimated Annual Savings</p>
                 </div>
               </div>
+            </section>
+
+            <section className="bg-white rounded-[2rem] p-8 shadow-sm border border-black/5">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-serif italic flex items-center gap-2">
+                  <TrendingUp size={24} className="text-emerald-600" /> Green Purchases Over Time
+                </h3>
+                {stats.history.length > 0 && (
+                  <div className="flex gap-2">
+                    {(["carbon", "plastic", "money"] as const).map(m => (
+                      <button
+                        key={m}
+                        onClick={() => setChartMetric(m)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${chartMetric === m ? "bg-emerald-600 text-white" : "bg-[#f5f5f0] text-black/40 hover:bg-emerald-50"}`}
+                      >
+                        {m === "carbon" ? "CO₂" : m === "plastic" ? "Plastic" : "Money"}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {stats.history.length === 0 ? (
+                <div className="h-40 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-emerald-100 rounded-2xl">
+                  <Leaf size={32} className="text-emerald-200" />
+                  <p className="text-sm opacity-40 italic">Make your first green swap to see your impact here</p>
+                </div>
+              ) : (() => {
+                const metricConfig = {
+                  carbon:  { label: "CO₂ Saved (kg)",    getValue: (e: typeof stats.history[0]) => e.carbonSavedKg  || 0, color: "bg-green-500"   },
+                  plastic: { label: "Plastic Saved (kg)", getValue: (e: typeof stats.history[0]) => e.plasticSavedKg || 0, color: "bg-blue-500"    },
+                  money:   { label: "Money Saved ($)",    getValue: (e: typeof stats.history[0]) => e.savings        || 0, color: "bg-emerald-500" },
+                } as const;
+                const cfg = metricConfig[chartMetric];
+                const reversed = [...stats.history].reverse();
+                const values = reversed.map(cfg.getValue);
+                const max = Math.max(...values.map(v => Number(v)), 0.01);
+                return (
+                  <>
+                    <p className="text-xs opacity-40 uppercase tracking-widest font-bold mb-4">{cfg.label} per swap</p>
+                    <div className="flex items-end gap-3 h-40">
+                      {reversed.map((entry, i) => {
+                        const val = cfg.getValue(entry);
+                        const height = (val / max) * 100;
+                        return (
+                          <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                            <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                              {val.toFixed(1)} · {entry.alternative}
+                            </div>
+                            <div className="w-full flex items-end" style={{ height: "100%" }}>
+                              <div
+                                className={`w-full rounded-t-lg ${cfg.color} transition-all duration-500`}
+                                style={{ height: `${height}%`, minHeight: val > 0 ? "4px" : "0" }}
+                              />
+                            </div>
+                            <p className="text-[9px] opacity-30 text-center truncate w-full">{entry.date}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                );
+              })()}
             </section>
 
             <section className="bg-white rounded-[2rem] p-8 shadow-sm border border-black/5">
