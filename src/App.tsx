@@ -176,11 +176,11 @@ export default function App() {
         ]
       }`;
 
-      const filterContext = `The user wants to buy REAL products AVAILABLE TODAY. 
-      1. Use Google Search to find specific, real-world eco-friendly alternatives that are currently in stock.
+      const filterContext = `The user wants to buy REAL, PHYSICAL products AVAILABLE TODAY. 
+      1. Use Google Search to find specific, real-world eco-friendly alternatives that are currently in stock on major retailers like Amazon, Target, Walmart, or official brand stores.
       2. Ensure each alternative has at least ${minSustainability}/100 sustainability and a price rating no higher than ${maxPrice}/5.
       3. CRITICAL: The 'buyUrl' MUST be a direct, verified link to a SPECIFIC product page (e.g., https://www.amazon.com/dp/B08XW7Y8XW or https://www.target.com/p/product-name). 
-      4. DO NOT provide general website homepages (e.g., do not just link to 'https://www.patagonia.com'). Link to the EXACT product.
+      4. DO NOT provide general website homepages. If you cannot find a direct product page, search for the product on Amazon and provide that link.
       5. Verify the brand and product name match the URL provided.
       6. If a barcode was provided (${barcodeValue || "none"}), search for that specific product first to understand what it is.
       7. IF YOU CANNOT FIND A DIRECT, VERIFIED PRODUCT PAGE URL, DO NOT SUGGEST THAT PRODUCT.
@@ -278,12 +278,17 @@ export default function App() {
     }
   };
 
+  const isVerifiedRetailer = (url: string) => {
+    const retailers = ['amazon.com', 'target.com', 'walmart.com', 'ebay.com', 'etsy.com', 'patagonia.com', 'allbirds.com', 'blueland.com'];
+    return retailers.some(r => url.toLowerCase().includes(r));
+  };
+
   const handleBuy = (alt: Alternative) => {
-    if (!result) return;
+    if (!alt.buyUrl) return;
     
     // Log the purchase for impact tracking
     const newSwap = {
-      item: result.originalItem,
+      item: result?.originalItem || input || "Unknown Item",
       alternative: alt.name,
       brand: alt.brand,
       date: new Date().toLocaleDateString(),
@@ -299,7 +304,7 @@ export default function App() {
     }));
     
     // Open the purchase URL
-    window.open(alt.buyUrl, '_blank');
+    window.open(alt.buyUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleSearch = (e: FormEvent) => {
@@ -705,8 +710,15 @@ export default function App() {
                             <div className="px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-widest rounded-full w-fit mb-2">
                               {alt.brand}
                             </div>
-                            <h4 className="text-2xl font-serif italic text-emerald-800">{alt.name}</h4>
-                            <p className="text-emerald-600 font-bold mt-1">{alt.price}</p>
+                            <h4 className="text-2xl font-serif italic text-emerald-800 leading-tight">{alt.name}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-emerald-600 font-bold">{alt.price}</p>
+                              {isVerifiedRetailer(alt.buyUrl) && (
+                                <div className="flex items-center gap-1 text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                                  <CheckCircle2 size={10} /> Verified Retailer
+                                </div>
+                              )}
+                            </div>
                           </div>
                           <div className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100">
                             {getPriceRange(alt.priceRating)}
@@ -822,6 +834,34 @@ export default function App() {
             </section>
           </motion.div>
         )}
+
+        {/* Who Are We Section */}
+        <section className="mt-24 pt-24 border-t border-black/5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-4xl sm:text-5xl font-serif italic mb-6 text-emerald-900 leading-tight">Who Are We?</h2>
+              <p className="text-lg text-emerald-800/70 leading-relaxed mb-8">
+                We are a team of students at <span className="font-bold text-emerald-900">Duke University</span> united by a single mission: to solve the plastic pollution crisis. 
+                EcoSwap was born out of our shared passion for sustainability and our belief that small, everyday choices can lead to massive global change.
+              </p>
+              <div className="flex items-center gap-4 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 w-fit">
+                <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white">
+                  <Users size={20} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-900/40">Our Team</p>
+                  <p className="text-sm font-medium text-emerald-900">Ryan, Adelene, Lida, & Grace</p>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="aspect-square bg-emerald-100 rounded-[2rem] flex items-center justify-center text-emerald-600 text-4xl font-serif italic shadow-sm">R</div>
+              <div className="aspect-square bg-emerald-200 rounded-[2rem] flex items-center justify-center text-emerald-700 text-4xl font-serif italic mt-8 shadow-sm">A</div>
+              <div className="aspect-square bg-emerald-50 rounded-[2rem] flex items-center justify-center text-emerald-500 text-4xl font-serif italic -mt-8 shadow-sm">L</div>
+              <div className="aspect-square bg-emerald-600 rounded-[2rem] flex items-center justify-center text-white text-4xl font-serif italic shadow-md">G</div>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
